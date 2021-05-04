@@ -39,6 +39,12 @@ def insert_length(length, new_img):
             if str_len_ptr == length:
                 break
 
+def Secret_Loader():
+    lines = ""
+    with open('secret.txt','r') as file:
+        lines = file.readlines()
+    # print(lines)
+    return ''.join(lines)
 
 def main():
     photo = Image.open("bapa sitaram90.jpg").convert('RGB')
@@ -53,11 +59,10 @@ def main():
             new_img[x][y][1] = data[x][y][1]
             new_img[x][y][2] = data[x][y][2]
 
-    secret = Tex2bin()
+    secret = Tex2bin(Secret_Loader())
     secret_pointer = 0
 
     lensecret = len(secret)
-    print(lensecret)
     insert_length(lensecret, new_img)
 
     for x in range(1, height):

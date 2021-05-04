@@ -27,8 +27,6 @@ def Length_extract(data):
     return length
 
 
-
-
 photo = Image.open("stg.PNG")
 data = np.asarray(photo)
 width, height = photo.size
