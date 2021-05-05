@@ -2,49 +2,52 @@ import numpy as np
 from PIL import Image
 
 
-def Tex2bin(string):
+def tex2bin(string):  # converts Text to binary
     bits = ''.join(format(i, '08b') for i in bytearray(str(string), encoding='utf-8'))
     return bits
 
 
-def Pixel_Secret_Insertion(raw_data, string, ptr):
+def insert_data_in_pixel(raw_data, string, ptr, bits=1):  # this function takes a pixel's data and then converts it to
+                                                          # binary and then change the last bit to the secret
     color = bin(raw_data)[2:]
     # old = color                                      # troubleshooting lines
-    color = color[:len(color) - 1]
-    color = color + string[ptr]
-    # print("original-> ", old, "Modified-> ", color)  # troubleshooting lines
+    color = color[:len(color) - bits]
+    color = color + string[ptr: ptr + bits]
+    # print("original-> ", old,"| |added bits ",string[ptr: ptr+bits],"| |Modified-> ", color)  # troubleshooting lines
     return np.uint8(int(color, 2))
 
 
-def insert_length(length, new_img):
+def insert_length(length, new_img):  # inserts length of our secret and the length itself is obfuscated
     secret_string_len = '<l>' + str(int(length / 4) + 16) + '<l>'  # Added ambiguity
-    secret_string_len = Tex2bin(secret_string_len)
-    # print(len(secret_string_len))
+    secret_string_len = tex2bin(secret_string_len)
+    print(len(secret_string_len))
     length = len(secret_string_len)
     str_len_ptr = 0
 
     for y in range(length):
         x = 0
         if str_len_ptr < length:
-            new_img[x][y][0] = Pixel_Secret_Insertion(new_img[x][y][0], secret_string_len, str_len_ptr)
+            new_img[x][y][0] = insert_data_in_pixel(new_img[x][y][0], secret_string_len, str_len_ptr, bits=2)
+            str_len_ptr += 2
+            if str_len_ptr == length:
+                break
+            new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret_string_len, str_len_ptr)
             str_len_ptr += 1
             if str_len_ptr == length:
                 break
-            new_img[x][y][1] = Pixel_Secret_Insertion(new_img[x][y][1], secret_string_len, str_len_ptr)
-            str_len_ptr += 1
-            if str_len_ptr == length:
-                break
-            new_img[x][y][2] = Pixel_Secret_Insertion(new_img[x][y][2], secret_string_len, str_len_ptr)
-            str_len_ptr += 1
+            new_img[x][y][2] = insert_data_in_pixel(new_img[x][y][2], secret_string_len, str_len_ptr, bits=2)
+            str_len_ptr += 2
             if str_len_ptr == length:
                 break
 
-def Secret_Loader():
+
+def secret_Loader():  # loads secret from a file
     lines = ""
-    with open('secret.txt','r') as file:
+    with open('secret.txt', 'r') as file:
         lines = file.readlines()
     # print(lines)
     return ''.join(lines)
+
 
 def main():
     photo = Image.open("bapa sitaram90.jpg").convert('RGB')
@@ -59,7 +62,7 @@ def main():
             new_img[x][y][1] = data[x][y][1]
             new_img[x][y][2] = data[x][y][2]
 
-    secret = Tex2bin(Secret_Loader())
+    secret = tex2bin(secret_Loader())
     secret_pointer = 0
 
     lensecret = len(secret)
@@ -70,26 +73,25 @@ def main():
             if lensecret > secret_pointer:
 
                 # RED
-                new_img[x][y][0] = Pixel_Secret_Insertion(new_img[x][y][0], secret, secret_pointer)
-                secret_pointer += 1
+                new_img[x][y][0] = insert_data_in_pixel(new_img[x][y][0], secret, secret_pointer, bits=2)
+                secret_pointer += 2
                 if lensecret == secret_pointer:
                     break
 
                 # Green
-                new_img[x][y][1] = Pixel_Secret_Insertion(new_img[x][y][1], secret, secret_pointer)
+                new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret, secret_pointer)
                 secret_pointer += 1
                 if lensecret == secret_pointer:
                     break
                 # Blue
-                new_img[x][y][2] = Pixel_Secret_Insertion(new_img[x][y][2], secret, secret_pointer)
-                secret_pointer += 1
+                new_img[x][y][2] = insert_data_in_pixel(new_img[x][y][2], secret, secret_pointer, bits=2)
+                secret_pointer += 2
                 if lensecret == secret_pointer:
                     break
 
-    # print(new_img[0])
-    newimage = Image.fromarray(new_img)
-    newimage.show()
-    newimage = newimage.save('stg.PNG')
+    new_img = Image.fromarray(new_img)
+    new_img.show()
+    new_img = new_img.save('stg.PNG')
 
 
 if __name__ == '__main__':
