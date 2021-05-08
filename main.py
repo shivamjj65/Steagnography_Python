@@ -27,12 +27,12 @@ def insert_length(length, new_img):  # inserts length of our secret and the leng
     for y in range(length):
         x = 0
         if str_len_ptr < length:
-            new_img[x][y][0] = insert_data_in_pixel(new_img[x][y][0], secret_string_len, str_len_ptr, bits=2)
-            str_len_ptr += 2
+            new_img[x][y][0] = insert_data_in_pixel(new_img[x][y][0], secret_string_len, str_len_ptr, bits=3)
+            str_len_ptr += 3
             if str_len_ptr == length:
                 break
-            new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret_string_len, str_len_ptr)
-            str_len_ptr += 1
+            new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret_string_len, str_len_ptr,bits=3)
+            str_len_ptr += 3
             if str_len_ptr == length:
                 break
             new_img[x][y][2] = insert_data_in_pixel(new_img[x][y][2], secret_string_len, str_len_ptr, bits=2)
@@ -73,14 +73,14 @@ def main():
             if lensecret > secret_pointer:
 
                 # RED
-                new_img[x][y][0] = insert_data_in_pixel(new_img[x][y][0], secret, secret_pointer, bits=2)
-                secret_pointer += 2
+                new_img[x][y][0] = insert_data_in_pixel(new_img[x][y][0], secret, secret_pointer, bits=3)
+                secret_pointer += 3
                 if lensecret == secret_pointer:
                     break
 
                 # Green
-                new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret, secret_pointer)
-                secret_pointer += 1
+                new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret, secret_pointer, bits=3)
+                secret_pointer += 3
                 if lensecret == secret_pointer:
                     break
                 # Blue

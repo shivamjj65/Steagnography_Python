@@ -25,8 +25,8 @@ def Length_extract(data):
     length = ''
     for i in range(width):
         x = 0
-        length += to_8bit(data[x][i][0])[-2:]
-        length += to_8bit(data[x][i][1])[-1]
+        length += to_8bit(data[x][i][0])[-3:]
+        length += to_8bit(data[x][i][1])[-3:]
         length += to_8bit(data[x][i][2])[-2:]
 
         # print(bin(data[x][i][0])[-2:]+bin(data[x][i][1])[-1]+bin(data[x][i][2])[-2:])
@@ -53,12 +53,12 @@ for x in range(1, height):
     for y in range(width):
 
         if count < secretlength:
-            secret += to_8bit(data[x][y][0])[-2:]
-            count+=2
+            secret += to_8bit(data[x][y][0])[-3:]
+            count += 3
             if count == secretlength:
                 break
-            secret += to_8bit(data[x][y][1])[-1]
-            count += 1
+            secret += to_8bit(data[x][y][1])[-3:]
+            count += 3
             if count == secretlength:
                 break
             secret += to_8bit(data[x][y][2])[-2:]
