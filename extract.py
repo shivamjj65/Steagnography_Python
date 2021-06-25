@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 
+
 def tex2bin(secret):
     bits = ''.join(format(i, '08b') for i in bytearray(secret, encoding='utf-8'))
     return bits
@@ -33,13 +34,12 @@ def Length_extract(data):
         # print(to_8bit(data[x][i][0])[-2:]+'| |'+to_8bit(data[x][i][1])[-1]+'| |'+to_8bit(data[x][i][2])[-2:])
 
     length = bin2txt(length).split('<l>')[1]
-    print(length)
     length = (int(length)-16)*4
     # print(length)
     return length
 
 
-photo = Image.open("stg.PNG")
+photo = Image.open("stg.png")
 data = np.asarray(photo)
 width, height = photo.size
 # print(data[0])
@@ -67,4 +67,4 @@ for x in range(1, height):
                 break
 
 print("secret -> ", bin2txt(secret))
-print(count)
+# print(count)

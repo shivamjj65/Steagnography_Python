@@ -1,6 +1,8 @@
 import numpy as np
 from PIL import Image
-
+import blowfish
+# from numba import jit,cuda
+import time
 
 def tex2bin(string):  # converts Text to binary
     bits = ''.join(format(i, '08b') for i in bytearray(str(string), encoding='utf-8'))
@@ -40,16 +42,16 @@ def insert_length(length, new_img):  # inserts length of our secret and the leng
             if str_len_ptr == length:
                 break
 
-
-def secret_Loader():  # loads secret from a file
-    lines = ""
+def secret_Loader():                            # loads secret from a file
     with open('secret.txt', 'r') as file:
         lines = file.readlines()
-    # print(lines)
-    return ''.join(lines)
+    plaintext = ''.join(lines)
 
+    return plaintext
 
+# @jit
 def main():
+    start = time.time()
     photo = Image.open("bapa sitaram90.jpg").convert('RGB')
     data = np.asarray(photo)
     # print(data[0])
@@ -90,9 +92,9 @@ def main():
                     break
 
     new_img = Image.fromarray(new_img)
-    new_img.show()
+    # new_img.show()
     new_img = new_img.save('stg.PNG')
-
+    print('Exectuted in->', time.time()-start)
 
 if __name__ == '__main__':
     main()
