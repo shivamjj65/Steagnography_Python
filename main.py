@@ -1,16 +1,25 @@
+import sys
+
 import numpy as np
 from PIL import Image
-import blowfish
+import encryption
 # from numba import jit,cuda
 import time
+
 
 def tex2bin(string):  # converts Text to binary
     bits = ''.join(format(i, '08b') for i in bytearray(str(string), encoding='utf-8'))
     return bits
 
+def byte2bin(bytestring):
+    print("\n from byte 2 bin\n")
+    print(bytestring)
+    bitstring= bin(int.from_bytes(bytestring, byteorder="big"))
+    return bitstring[2:]
+
 
 def insert_data_in_pixel(raw_data, string, ptr, bits=1):  # this function takes a pixel's data and then converts it to
-                                                          # binary and then change the last bit to the secret
+    # binary and then change the last bit to the secret
     color = bin(raw_data)[2:]
     # old = color                                      # troubleshooting lines
     color = color[:len(color) - bits]
@@ -22,7 +31,6 @@ def insert_data_in_pixel(raw_data, string, ptr, bits=1):  # this function takes 
 def insert_length(length, new_img):  # inserts length of our secret and the length itself is obfuscated
     secret_string_len = '<l>' + str(int(length / 4) + 16) + '<l>'  # Added ambiguity
     secret_string_len = tex2bin(secret_string_len)
-    print(len(secret_string_len))
     length = len(secret_string_len)
     str_len_ptr = 0
 
@@ -33,7 +41,7 @@ def insert_length(length, new_img):  # inserts length of our secret and the leng
             str_len_ptr += 3
             if str_len_ptr == length:
                 break
-            new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret_string_len, str_len_ptr,bits=3)
+            new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret_string_len, str_len_ptr, bits=3)
             str_len_ptr += 3
             if str_len_ptr == length:
                 break
@@ -42,17 +50,24 @@ def insert_length(length, new_img):  # inserts length of our secret and the leng
             if str_len_ptr == length:
                 break
 
-def secret_Loader():                            # loads secret from a file
-    with open('secret.txt', 'r') as file:
-        lines = file.readlines()
-    plaintext = ''.join(lines)
 
-    return plaintext
+def secret_Loader():                                       # loads secret from a file
+    with open('Message.txt', 'r',encoding='utf-8',errors='ignore') as file:
+        lines = file.readlines()
+    message = ''.join(lines)
+
+    with open("secret_key.txt","r") as file:
+        key= file.readlines()
+    key = ''.join(key)
+
+    enc_message= encryption.encrypt(message,key)
+    return enc_message
+
 
 # @jit
 def main():
     start = time.time()
-    photo = Image.open("bapa sitaram90.jpg").convert('RGB')
+    photo = Image.open("Lion.jpg").convert('RGB')
     data = np.asarray(photo)
     # print(data[0])
     width, height = photo.size
@@ -64,7 +79,9 @@ def main():
             new_img[x][y][1] = data[x][y][1]
             new_img[x][y][2] = data[x][y][2]
 
-    secret = tex2bin(secret_Loader())
+    secret = byte2bin(secret_Loader())
+    print(len(secret))
+
     secret_pointer = 0
 
     lensecret = len(secret)
@@ -94,7 +111,8 @@ def main():
     new_img = Image.fromarray(new_img)
     # new_img.show()
     new_img = new_img.save('stg.PNG')
-    print('Exectuted in->', time.time()-start)
+    print('Exectuted in->', time.time() - start)
+
 
 if __name__ == '__main__':
     main()
