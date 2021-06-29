@@ -34,6 +34,6 @@ if __name__ == '__main__':
     with open("secret_key.txt","r") as file:
         key = file.readlines()
     key = ''.join(key)
-    encypted_msg = encrypt("the message",key)
+    encypted_msg = encrypt("the message", key)
     print(repr(encypted_msg))
-    decrypt(encypted_msg,key)
+    decrypt(encypted_msg, key)

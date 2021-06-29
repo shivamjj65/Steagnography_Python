@@ -1,10 +1,17 @@
 import kafka
-import time
+import config_loader
 
-bootstrap_servers = ['localhost:9092']
-topicName = 'First'
-producer = kafka.KafkaProducer(bootstrap_servers = bootstrap_servers)
-for i in range(100):
-    producer.send(topicName, bytearray('hello from Python '+str(i),encoding='utf-8'))
-    time.sleep(2)
-    producer.flush()
+bootstrap_servers = config_loader.read('''data['kafka']['bootstrap_servers']''')
+topicName = config_loader.read('''data['kafka']['topic']''')
+
+producer = kafka.KafkaProducer(bootstrap_servers=bootstrap_servers)
+producer.send(topicName, b'start')
+producer.flush()
+
+with open("stg.PNG", 'rb') as file:
+    for line in file.readlines():
+        producer.send(topicName, line)
+        producer.flush()
+
+producer.send(topicName, b'stop')
+producer.flush()

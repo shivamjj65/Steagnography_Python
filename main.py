@@ -1,5 +1,5 @@
-import sys
-
+import os.path
+import config_loader
 import numpy as np
 from PIL import Image
 import encryption
@@ -11,25 +11,26 @@ def tex2bin(string):  # converts Text to binary
     bits = ''.join(format(i, '08b') for i in bytearray(str(string), encoding='utf-8'))
     return bits
 
+
 def byte2bin(bytestring):
-    print("\n from byte 2 bin\n")
-    print(bytestring)
-    bitstring= bin(int.from_bytes(bytestring, byteorder="big"))
+    # print("\n from byte 2 bin\n")
+    # print(bytestring)
+    bitstring = bin(int.from_bytes(bytestring, byteorder="big"))
     return bitstring[2:]
 
 
-def insert_data_in_pixel(raw_data, string, ptr, bits=1):  # this function takes a pixel's data and then converts it to
-    # binary and then change the last bit to the secret
+def insert_data_in_pixel(raw_data, string, ptr, bits=1):            # this function takes a pixel's data and then converts it to
+                                                                    # binary and then change the last bit to the secret
     color = bin(raw_data)[2:]
-    # old = color                                      # troubleshooting lines
+    # old = color                                                   # troubleshooting lines
     color = color[:len(color) - bits]
     color = color + string[ptr: ptr + bits]
     # print("original-> ", old,"| |added bits ",string[ptr: ptr+bits],"| |Modified-> ", color)  # troubleshooting lines
     return np.uint8(int(color, 2))
 
 
-def insert_length(length, new_img):  # inserts length of our secret and the length itself is obfuscated
-    secret_string_len = '<l>' + str(int(length / 4) + 16) + '<l>'  # Added ambiguity
+def insert_length(length, new_img):                                 # inserts length of our secret and the length itself is obfuscated
+    secret_string_len = '<l>' + str(int(length / 4) + 16) + '<l>'   # Added ambiguity
     secret_string_len = tex2bin(secret_string_len)
     length = len(secret_string_len)
     str_len_ptr = 0
@@ -51,23 +52,23 @@ def insert_length(length, new_img):  # inserts length of our secret and the leng
                 break
 
 
-def secret_Loader():                                       # loads secret from a file
-    with open('Message.txt', 'r',encoding='utf-8',errors='ignore') as file:
+def secret_Loader():                                                # loads secret from a file
+    with open('Message.txt', 'r', encoding='utf-8', errors='ignore') as file:
         lines = file.readlines()
     message = ''.join(lines)
 
-    with open("secret_key.txt","r") as file:
-        key= file.readlines()
-    key = ''.join(key)
-
-    enc_message= encryption.encrypt(message,key)
+    key = config_loader.read('''data['key']''')
+    print(key)
+    enc_message = encryption.encrypt(message, key)
     return enc_message
 
 
 # @jit
 def main():
     start = time.time()
-    photo = Image.open("Lion.jpg").convert('RGB')
+
+    dir_path = config_loader.read('''data['environment']['images']''')
+    photo = Image.open(os.path.join(dir_path, r'bapa sitaram90.jpg')).convert('RGB')                # just insert the image name here
     data = np.asarray(photo)
     # print(data[0])
     width, height = photo.size

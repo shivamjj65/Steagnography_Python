@@ -1,0 +1,9 @@
+environment:
+  images: D:\College\PYTHON PROGRAMS\Steagnography\images
+  receive_path: D:\College\PYTHON PROGRAMS\Steagnography\received_images
+kafka:
+  bootstrap_servers: localhost:9092
+  topic: First
+key: thesecretkeyisnothing
+last_offset:
+  offset: 12593
