@@ -1,5 +1,6 @@
 import blowfish
 from operator import xor
+import time
 
 
 def make_bytes(plaintext):
@@ -9,6 +10,7 @@ def make_bytes(plaintext):
 
 
 def encrypt(plaintext, secret_key):
+    start = time.time()
     plaintext = make_bytes(plaintext)
     secret_key = make_bytes(secret_key)
 
@@ -16,6 +18,7 @@ def encrypt(plaintext, secret_key):
     nounce = int.from_bytes(b"9867", "big")
     enc_counter = blowfish.ctr_counter(nounce, f=xor)
     data_encrypted = b"".join(key.encrypt_ctr(plaintext, enc_counter))
+    print("encryption in ", time.time()-start)
     return data_encrypted
 
 

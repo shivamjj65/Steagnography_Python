@@ -41,12 +41,14 @@ def length_extract(data):
         length += to_8bit(data[x][i][1])[-3:]
         length += to_8bit(data[x][i][2])[-2:]
 
-    length = bin2txt(length).split('<l>')[1]
+    temp= bin2txt(length)
+    # print(temp)
+    length = temp.split('<l>')[1]
     length = (int(length) - 16) * 4
     return length
 
 
-photo = Image.open("received_images/2021_06_29-05-03_59.PNG")
+photo = Image.open(r"D:\College\PYTHON PROGRAMS\Steagnography\received_images\2021_08_10-05-53_06.PNG")
 data = np.asarray(photo)
 width, height = photo.size
 
@@ -58,20 +60,22 @@ for x in range(1, height):
     for y in range(width):
 
         if count < secretlength:
-            secret += to_8bit(data[x][y][0])[-3:]
-            count += 3
-            if count == secretlength:
-                break
-            secret += to_8bit(data[x][y][1])[-3:]
-            count += 3
-            if count == secretlength:
-                break
-            secret += to_8bit(data[x][y][2])[-2:]
+            secret += to_8bit(data[x][y][0])[-2:]
             count += 2
+            if count == secretlength:
+                break
+            secret += to_8bit(data[x][y][1])[-2:]
+            count += 2
+            if count == secretlength:
+                break
+            secret += to_8bit(data[x][y][2])[-1:]
+            count += 1
             if count == secretlength:
                 break
 enc_text = bin2byte(secret)
 message = secret2txt(enc_text)
+
 print(message)
+
 # with open("recieved.txt","w+") as file:
 #     file.writelines(message)

@@ -1,15 +1,8 @@
-import os.path
 import config_loader
 import numpy as np
 from PIL import Image
 import encryption
-# from numba import jit,cuda
 import time
-
-
-def tex2bin(string):  # converts Text to binary
-    bits = ''.join(format(i, '08b') for i in bytearray(str(string), encoding='utf-8'))
-    return bits
 
 
 def byte2bin(bytestring):
@@ -19,9 +12,9 @@ def byte2bin(bytestring):
     return bitstring[2:]
 
 
-def insert_data_in_pixel(raw_data, string, ptr, bits=1):            # this function takes a pixel's data and then converts it to
-                                                                    # binary and then change the last bit to the secret
-    color = bin(raw_data)[2:]
+def insert_data_in_pixel(raw_data, string, ptr, bits=1):  # this function takes a pixel's data and then converts it to
+                                                          # binary and then change the last bit to the secret
+    color = bin(int(raw_data))[2:]
     # old = color                                                   # troubleshooting lines
     color = color[:len(color) - bits]
     color = color + string[ptr: ptr + bits]
@@ -29,9 +22,9 @@ def insert_data_in_pixel(raw_data, string, ptr, bits=1):            # this funct
     return np.uint8(int(color, 2))
 
 
-def insert_length(length, new_img):                                 # inserts length of our secret and the length itself is obfuscated
-    secret_string_len = '<l>' + str(int(length / 4) + 16) + '<l>'   # Added ambiguity
-    secret_string_len = tex2bin(secret_string_len)
+def insert_length(length, new_img):  # inserts length of our secret and the length itself is obfuscated
+    secret_string_len = '<l>' + str(int(length / 4) + 16) + '<l>'  # Added ambiguity
+    secret_string_len = ''.join(format(_, '08b') for _ in bytearray(str(secret_string_len), encoding='utf-8'))
     length = len(secret_string_len)
     str_len_ptr = 0
 
@@ -52,68 +45,66 @@ def insert_length(length, new_img):                                 # inserts le
                 break
 
 
-def secret_Loader():                                                # loads secret from a file
+def secret_Loader():  # loads secret from a file
     with open('Message.txt', 'r', encoding='utf-8', errors='ignore') as file:
         lines = file.readlines()
     message = ''.join(lines)
 
     key = config_loader.read('''data['key']''')
-    print(key)
+    # print(key)
     enc_message = encryption.encrypt(message, key)
     return enc_message
 
 
-# @jit
-def main():
+def insert():
     start = time.time()
 
-    dir_path = config_loader.read('''data['environment']['images']''')
-    photo = Image.open(os.path.join(dir_path, r'bapa sitaram90.jpg')).convert('RGB')                # just insert the image name here
-    data = np.asarray(photo)
-    # print(data[0])
+    image_path = config_loader.read('''data['environment']['cover_image']''')
+    photo = Image.open(image_path).convert('RGB')  # just insert the image name here
+    data = np.asarray(photo).copy()
     width, height = photo.size
-    new_img = np.empty([height, width, 3], dtype=np.uint8)
 
-    for x in range(height):
-        for y in range(width):
-            new_img[x][y][0] = data[x][y][0]
-            new_img[x][y][1] = data[x][y][1]
-            new_img[x][y][2] = data[x][y][2]
 
     secret = byte2bin(secret_Loader())
-    print(len(secret))
-
     secret_pointer = 0
 
     lensecret = len(secret)
-    insert_length(lensecret, new_img)
+    insert_length(lensecret, data)
 
+    insertion = time.time()
     for x in range(1, height):
         for y in range(width):
             if lensecret > secret_pointer:
 
                 # RED
-                new_img[x][y][0] = insert_data_in_pixel(new_img[x][y][0], secret, secret_pointer, bits=3)
-                secret_pointer += 3
-                if lensecret == secret_pointer:
-                    break
-
-                # Green
-                new_img[x][y][1] = insert_data_in_pixel(new_img[x][y][1], secret, secret_pointer, bits=3)
-                secret_pointer += 3
-                if lensecret == secret_pointer:
-                    break
-                # Blue
-                new_img[x][y][2] = insert_data_in_pixel(new_img[x][y][2], secret, secret_pointer, bits=2)
+                data[x][y][0] = insert_data_in_pixel(data[x][y][0], secret, secret_pointer, bits=2)
                 secret_pointer += 2
                 if lensecret == secret_pointer:
                     break
 
-    new_img = Image.fromarray(new_img)
-    # new_img.show()
-    new_img = new_img.save('stg.PNG')
+                # Green
+                data[x][y][1] = insert_data_in_pixel(data[x][y][1], secret, secret_pointer, bits=2)
+                secret_pointer += 2
+                if lensecret == secret_pointer:
+                    break
+
+                # Blue
+                data[x][y][2] = insert_data_in_pixel(data[x][y][2], secret, secret_pointer, bits=1)
+                secret_pointer += 1
+                if lensecret == secret_pointer:
+                    break
+
+    print("data insertion",time.time()-insertion)
+    generation = time.time()
+    # print(data)
+    data = Image.fromarray(data)
+    print("image generation in ", time.time()-generation)
+    # data.show()
+    _ = time.time()
+    data.save(r'stg.PNG')
+    print("saving time ", time.time()-_)
     print('Exectuted in->', time.time() - start)
 
 
 if __name__ == '__main__':
-    main()
+    insert()

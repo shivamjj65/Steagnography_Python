@@ -23,12 +23,12 @@ with open(os.path.join(dir_path, date+".PNG"), "ab") as file:    # receiving mes
         if message.offset > offset:
 
             if message.value == b'start':
-                # print('start offset')
+                print('start offset')
                 continue
                 # print(message)
 
             elif message.value == b'stop':                        # saves the last offset read by the consumer
-                # print("end offset")
+                print("end offset")
                 # print(message)
                 with open('config.yaml', 'r+') as config_file:
                     data = yaml.safe_load(config_file)

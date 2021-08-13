@@ -1,9 +1,9 @@
 environment:
-  images: D:\College\PYTHON PROGRAMS\Steagnography\images
+  cover_image: C:/Users/arjun/OneDrive/Pictures/BingImageOfTheDay.jpg
   receive_path: D:\College\PYTHON PROGRAMS\Steagnography\received_images
 kafka:
   bootstrap_servers: localhost:9092
   topic: First
 key: thesecretkeyisnothing
 last_offset:
-  offset: 12593
+  offset: 12758
